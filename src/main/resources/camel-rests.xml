@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rests xmlns="http://camel.apache.org/schema/spring">
+     <rest id="json-proxy-rests" path="/">
+        <post consumes="application/json" id="predictions-post" uri="/predictions">
+            <route>
+                <doTry>
+                    <to uri="direct:predictions"/>
+                    <doCatch>
+                        <exception>java.lang.Exception</exception>
+                        <to uri="direct:logError"/>
+                    </doCatch>
+                </doTry>
+            </route>
+        </post>
+        <get id="predictions-get" produces="application/json" uri="/predictions">
+            <route>
+                <doTry>
+                    <to uri="direct:predictions"/>
+                    <doCatch>
+                        <exception>java.lang.Exception</exception>
+                        <to uri="direct:logError"/>
+                    </doCatch>
+                </doTry>
+            </route>
+        </get>
+        <!--post consumes="application/json" id="proxy-post" uri="/proxy">
+            <route>
+                <doTry>
+                    <to uri="direct:proxy"/>
+                    <doCatch>
+                        <exception>java.lang.Exception</exception>
+                        <to uri="direct:logError"/>
+                    </doCatch>
+                </doTry>
+            </route>
+        </post>
+        <get consumes="application/json" id="proxy-get" uri="/proxy">
+            <route>
+                <doTry>
+                    <to uri="direct:proxy"/>
+                    <doCatch>
+                        <exception>java.lang.Exception</exception>
+                        <to uri="direct:logError"/>
+                    </doCatch>
+                </doTry>
+            </route>
+        </get-->
+    </rest>
+</rests>

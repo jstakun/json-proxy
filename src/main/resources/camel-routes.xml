@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<routes xmlns="http://camel.apache.org/schema/spring">
+    <!--route id="xml-route">
+        <from uri="timer:from-xml?period=10000"/>
+        <log message="Hello XML!"/>
+    </route-->
+    <route id="predictions">
+        <from uri="direct:predictions"/>
+        <wireTap uri="direct:log"/>
+        <removeHeaders pattern="CamelHttp*"/>
+        <log loggingLevel="INFO" message="Predictions\nRequest body:\n${body}\nRequest headers:\n${headers}"/>
+        <to uri="{{backend.url}}?bridgeEndpoint=false"/>
+        <log loggingLevel="INFO" message="Predictions\nResponse body:\n${body}\nResponse headers:\n${headers}"/>
+        <wireTap uri="direct:log"/>
+    </route>
+    <!--route id="proxy">
+        <from uri="direct:proxy"/> 
+    	<log loggingLevel="INFO" message="Proxy\nRequest body:\n${body}"/>
+    	<setBody>
+            <simple>{"status": "ok"}</simple>
+        </setBody>
+    </route-->
+    <route id="log">
+        <from uri="direct:log"/> 
+    	<removeHeaders pattern="CamelHttp*"/>
+    	<setHeader name="CamelHttpMethod">
+    	    <constant>POST</constant>
+	    </setHeader>
+	    <setHeader name="Content-Type">
+	    	<constant>application/json</constant>
+	    </setHeader>
+    	<log loggingLevel="INFO" message="Log\nRequest body:\n${body}\nRequest headers:\n${headers}"/>
+    	<to uri="{{logger.url}}?bridgeEndpoint=false"/>
+    	<log loggingLevel="INFO" message="Log\nResponse body:\n${body}\nResponse headers:\n${headers}"/>
+    </route>
+    <!--route id="Process output">
+        <from uri="direct:processOutput"/>
+        <marshal>
+            <json id="json" library="Jackson"/>
+        </marshal>
+        <removeHeaders pattern="*"/>
+    </route-->
+    <route id="Log error">
+        <from uri="direct:logError"/>
+        <log logName="net.gmsworld.server.camel" loggingLevel="ERROR" message="Operation failed with exception: ${exception.stacktrace}"/>
+        <setBody>
+            <simple>{"error" : "Operation failed"}</simple>
+        </setBody>
+        <removeHeaders pattern="*"/>
+        <setHeader name="CamelHttpResponseCode">
+            <constant>500</constant>
+        </setHeader>
+    </route>
+</routes>
