@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<routes xmlns="http://camel.apache.org/schema/spring">
+<routes id="routes-6a69cec0-aaa4-463c-aea7-36945dac9628" xmlns="http://camel.apache.org/schema/spring">
     <!--route id="xml-route">
         <from uri="timer:from-xml?period=10000"/>
         <log message="Hello XML!"/>
@@ -8,8 +8,24 @@
         <from uri="direct:predictions"/>
         <wireTap uri="direct:log"/>
         <removeHeaders pattern="CamelHttp*"/>
+        <!-- enrich with x-redhat-uid header and type -->
+         <choice>
+           <when>
+				<simple>${headers.x-redhat-uid} == null</simple>
+				<setHeader name="x-redhat-uid">
+            		<simple>${properties:default.user}</simple>
+                 </setHeader> 
+           </when>
+         </choice>  
+        <setBody>
+            <simple>{"type": "request", "uid": "${headers.x-redhat-uid}", "content": ${body}}</simple>
+        </setBody>
         <log loggingLevel="INFO" message="Predictions\nRequest body:\n${body}\nRequest headers:\n${headers}"/>
         <to uri="{{backend.url}}?bridgeEndpoint=false"/>
+        <!-- enrich with x-redhat-uid header and type -->
+        <setBody>
+            <simple>{"type": "response", "uid": "${headers.x-redhat-uid}", "content": ${body}}</simple>
+        </setBody>
         <log loggingLevel="INFO" message="Predictions\nResponse body:\n${body}\nResponse headers:\n${headers}"/>
         <wireTap uri="direct:log"/>
     </route>
@@ -21,17 +37,17 @@
         </setBody>
     </route-->
     <route id="log">
-        <from uri="direct:log"/> 
-    	<removeHeaders pattern="CamelHttp*"/>
-    	<setHeader name="CamelHttpMethod">
-    	    <constant>POST</constant>
-	    </setHeader>
-	    <setHeader name="Content-Type">
-	    	<constant>application/json</constant>
-	    </setHeader>
-    	<log loggingLevel="INFO" message="Log\nRequest body:\n${body}\nRequest headers:\n${headers}"/>
-    	<to uri="{{logger.url}}?bridgeEndpoint=false"/>
-    	<log loggingLevel="INFO" message="Log\nResponse body:\n${body}\nResponse headers:\n${headers}"/>
+        <from uri="direct:log"/>
+        <removeHeaders pattern="CamelHttp*"/>
+        <setHeader name="CamelHttpMethod">
+            <constant>POST</constant>
+        </setHeader>
+        <setHeader name="Content-Type">
+            <constant>application/json</constant>
+        </setHeader>
+        <log loggingLevel="INFO" message="Log\nRequest body:\n${body}\nRequest headers:\n${headers}"/>
+        <to uri="{{logger.url}}?bridgeEndpoint=false"/>
+        <log loggingLevel="INFO" message="Log\nResponse body:\n${body}\nResponse headers:\n${headers}"/>
     </route>
     <!--route id="Process output">
         <from uri="direct:processOutput"/>
@@ -44,7 +60,7 @@
         <from uri="direct:logError"/>
         <log logName="net.gmsworld.server.camel" loggingLevel="ERROR" message="Operation failed with exception: ${exception.stacktrace}"/>
         <setBody>
-            <simple>{"error" : "Operation failed"}</simple>
+            <constant>{"error" : "Operation failed"}</constant>
         </setBody>
         <removeHeaders pattern="*"/>
         <setHeader name="CamelHttpResponseCode">
