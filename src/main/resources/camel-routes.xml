@@ -15,7 +15,7 @@
             </when>
         </choice>
         <setHeader name="x-redhat-type">
-             <constant>request</constant>
+            <constant>request</constant>
         </setHeader>
         <wireTap uri="direct:log"/>
         <removeHeaders pattern="CamelHttp*"/>
@@ -24,10 +24,10 @@
         <to uri="{{backend.url}}?bridgeEndpoint=false"/>
         <log loggingLevel="INFO" message="Predictions\nResponse body:\n${body}\nResponse headers:\n${headers}"/>
         <setHeader name="x-redhat-type">
-             <constant>response</constant>
+            <constant>response</constant>
         </setHeader>
         <wireTap uri="direct:log"/>
-        <removeHeaders pattern="x-redhat*"/>  
+        <removeHeaders pattern="x-redhat*"/>
     </route>
     <!--route id="proxy">
         <from uri="direct:proxy"/> 
