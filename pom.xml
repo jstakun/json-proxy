@@ -10,9 +10,9 @@
     <maven.compiler.release>11</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
-    <quarkus.platform.group-id>com.redhat.quarkus.platform</quarkus.platform.group-id>
-    <quarkus.platform.version>2.7.5.Final-redhat-00011</quarkus.platform.version>
+    <quarkus.platform.artifact-id>quarkus-universe-bom</quarkus.platform.artifact-id>
+    <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
+    <quarkus.platform.version>2.12.1.Final</quarkus.platform.version>
     <skipITs>true</skipITs>
     <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
   </properties>
@@ -22,13 +22,6 @@
         <groupId>${quarkus.platform.group-id}</groupId>
         <artifactId>${quarkus.platform.artifact-id}</artifactId>
         <version>${quarkus.platform.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>io.quarkus.platform</groupId>
-        <artifactId>quarkus-camel-bom</artifactId>
-        <version>2.7.5.Final</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -60,13 +53,13 @@
       <artifactId>camel-quarkus-rest</artifactId>
     </dependency>
     <dependency>
-       <groupId>org.apache.camel.quarkus</groupId>
-       <artifactId>camel-quarkus-timer</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.apache.camel.quarkus</groupId>
       <artifactId>camel-quarkus-microprofile-metrics</artifactId>
-    </dependency>    
+    </dependency>
+    <dependency>
+    	<groupId>org.apache.camel.quarkus</groupId>
+    	<artifactId>camel-quarkus-zip-deflater</artifactId>
+	</dependency>      
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-arc</artifactId>

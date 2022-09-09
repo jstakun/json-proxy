@@ -1,33 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<routes id="routes-6a69cec0-aaa4-463c-aea7-36945dac9628" xmlns="http://camel.apache.org/schema/spring">
-    <!--route id="xml-route">
-        <from uri="timer:from-xml?period=10000"/>
-        <log message="Hello XML!"/>
-    </route-->
+<routes id="json-proxy-routes" xmlns="http://camel.apache.org/schema/spring"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://camel.apache.org/schema/spring https://camel.apache.org/schema/spring/camel-spring-3.18.0.xsd">
     <route id="predictions">
         <from uri="direct:predictions"/>
-        <choice>
-            <when>
-                <simple>${headers.x-redhat-uid} == null</simple>
-                <setHeader name="x-redhat-uid">
-                    <simple>${properties:default.user}</simple>
-                </setHeader>
-            </when>
-        </choice>
-        <setHeader name="x-redhat-type">
-            <constant>request</constant>
-        </setHeader>
-        <wireTap uri="direct:log"/>
-        <removeHeaders pattern="CamelHttp*"/>
-        <!-- enrich with x-redhat-uid header and type -->
-        <log loggingLevel="INFO" message="Predictions\nRequest body:\n${body}\nRequest headers:\n${headers}"/>
-        <to uri="{{backend.url}}?bridgeEndpoint=false"/>
-        <log loggingLevel="INFO" message="Predictions\nResponse body:\n${body}\nResponse headers:\n${headers}"/>
-        <setHeader name="x-redhat-type">
-            <constant>response</constant>
-        </setHeader>
-        <wireTap uri="direct:log"/>
-        <removeHeaders pattern="x-redhat*"/>
+        <doTry>
+	        <choice>
+    	        <when>
+        	        <simple>${headers.x-redhat-uid} == null</simple>
+            	    <setHeader name="x-redhat-uid">
+                	    <simple>${properties:default.user}</simple>
+                	</setHeader>
+            	</when>
+        	</choice>
+        	<setHeader name="x-redhat-type">
+            	<constant>request</constant>
+        	</setHeader>
+        	<wireTap uri="direct:log"/>
+        	<removeHeaders pattern="CamelHttp*"/>
+        	<!-- enrich with x-redhat-uid header and type -->
+        	<log loggingLevel="INFO" message="Predictions\nRequest body:\n${body}\nRequest headers:\n${headers}"/>
+        	<to uri="{{backend.url}}?bridgeEndpoint=false"/>
+        	<log loggingLevel="INFO" message="Predictions\nResponse body:\n${body}\nResponse headers:\n${headers}"/>
+        	<setHeader name="x-redhat-type">
+            	<constant>response</constant>
+        	</setHeader>
+        	<wireTap uri="direct:log"/>
+        	<removeHeaders pattern="x-redhat*"/>
+        	<choice> 
+        		<when>
+            		<simple>${headers.accept-encoding} contains 'gzip'</simple>
+					<marshal>
+						<gzipDeflater id="gzip"/>
+					</marshal>
+					<setHeader name="content-encoding">
+            			<constant>gzip</constant>
+        			</setHeader>
+        		</when>
+		    </choice>
+        	<doCatch>
+                        <exception>java.lang.Exception</exception>
+                        <to uri="direct:logError"/>
+             </doCatch>
+         </doTry>
     </route>
     <!--route id="proxy">
         <from uri="direct:proxy"/> 
