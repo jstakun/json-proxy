@@ -4,27 +4,43 @@
     <route id="predictions">
         <from uri="direct:predictions"/>
         <doTry>
-	        <choice>
+	        <!-- enrich with x-redhat-uid header and type -->
+        	<choice>
     	        <when>
         	        <simple>${headers.x-redhat-uid} == null</simple>
             	    <setHeader name="x-redhat-uid">
-                	    <simple>${properties:default.user}</simple>
+                	    <simple>${properties:app.default.user}</simple>
                 	</setHeader>
             	</when>
         	</choice>
-        	<setHeader name="x-redhat-type">
-            	<constant>request</constant>
-        	</setHeader>
-        	<wireTap uri="direct:log"/>
         	<removeHeaders pattern="CamelHttp*"/>
-        	<!-- enrich with x-redhat-uid header and type -->
-        	<log loggingLevel="INFO" message="Predictions\nRequest body:\n${body}\nRequest headers:\n${headers}"/>
+        	<choice>
+        		<when>
+        	    	<simple>${properties:app.log.request} =~ 'true'</simple>
+        	        <setHeader name="x-redhat-type">
+            			<constant>request</constant>
+        			</setHeader>
+        			<log loggingLevel="INFO" message="\n--- Predictions ${headers.x-redhat-type} ---\nRequest body:\n${body}\nRequest headers:\n${headers}\n---"/>
+        	    	<wireTap uri="direct:log"/>
+        		</when>
+        		<otherwise>
+        		    <log loggingLevel="INFO" message="Skipped logging request due to app.log.request == ${properties:app.log.request}"/>
+        		</otherwise>
+        	</choice>	    
         	<to uri="{{backend.url}}?bridgeEndpoint=false"/>
-        	<log loggingLevel="INFO" message="Predictions\nResponse body:\n${body}\nResponse headers:\n${headers}"/>
-        	<setHeader name="x-redhat-type">
-            	<constant>response</constant>
-        	</setHeader>
-        	<wireTap uri="direct:log"/>
+        	<choice>
+        		<when>
+        	    	<simple>${properties:app.log.response} =~ 'true'</simple>
+        	        <setHeader name="x-redhat-type">
+                 		<constant>response</constant>
+        			</setHeader>
+        			<log loggingLevel="INFO" message="\n--- Predictions ${headers.x-redhat-type} ---\nResponse body:\n${body}\nResponse headers:\n${headers}\n---"/>
+        	    	<wireTap uri="direct:log"/>
+        		</when> 
+        		<otherwise>
+        		    <log loggingLevel="INFO" message="Skipped logging response due to app.log.response == ${properties:app.log.response}"/>
+        		</otherwise>
+        	</choice>	    
         	<removeHeaders pattern="x-redhat*"/>
         	<choice> 
         		<when>
@@ -43,13 +59,6 @@
              </doCatch>
          </doTry>
     </route>
-    <!--route id="proxy">
-        <from uri="direct:proxy"/> 
-    	<log loggingLevel="INFO" message="Proxy\nRequest body:\n${body}"/>
-    	<setBody>
-            <simple>{"status": "ok"}</simple>
-        </setBody>
-    </route-->
     <route id="log">
         <from uri="direct:log"/>
         <removeHeaders pattern="CamelHttp*"/>
@@ -62,17 +71,10 @@
         <setBody>
             <simple>{"type": "${headers.x-redhat-type}", "uid": "${headers.x-redhat-uid}", "content": ${body}}</simple>
         </setBody>
-        <log loggingLevel="INFO" message="Log\nRequest body:\n${body}\nRequest headers:\n${headers}"/>
+        <log loggingLevel="INFO" message="\n--- Logger request ---\nRequest body:\n${body}\nRequest headers:\n${headers}\n---"/>
         <to uri="{{logger.url}}?bridgeEndpoint=false"/>
-        <log loggingLevel="INFO" message="Log\nResponse body:\n${body}\nResponse headers:\n${headers}"/>
+        <log loggingLevel="INFO" message="\n--- Logger response ---\nResponse body:\n${body}\nResponse headers:\n${headers}\n---"/>
     </route>
-    <!--route id="Process output">
-        <from uri="direct:processOutput"/>
-        <marshal>
-            <json id="json" library="Jackson"/>
-        </marshal>
-        <removeHeaders pattern="*"/>
-    </route-->
     <route id="Log error">
         <from uri="direct:logError"/>
         <log logName="net.gmsworld.server.camel" loggingLevel="ERROR" message="Operation failed with exception: ${exception.stacktrace}"/>
@@ -84,4 +86,18 @@
             <constant>500</constant>
         </setHeader>
     </route>
+    <!--route id="proxy">
+        <from uri="direct:proxy"/> 
+    	<log loggingLevel="INFO" message="Proxy\nRequest body:\n${body}"/>
+    	<setBody>
+            <simple>{"status": "ok"}</simple>
+        </setBody>
+    </route-->
+    <!--route id="Process output">
+        <from uri="direct:processOutput"/>
+        <marshal>
+            <json id="json" library="Jackson"/>
+        </marshal>
+        <removeHeaders pattern="*"/>
+    </route-->
 </routes>
