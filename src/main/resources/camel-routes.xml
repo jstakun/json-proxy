@@ -62,6 +62,14 @@
     <route id="log">
         <from uri="direct:log"/>
         <removeHeaders pattern="CamelHttp*"/>
+        <choice> 
+        	 <when>
+            	<simple>${properties:app.log.http.auth.basic} =~ 'true'</simple>
+				<setHeader name="Authorization">
+            		<simple>Basic ${properties:app.log.http.auth.basic.credentials}</simple>
+        		</setHeader>
+        	 </when>
+	    </choice>
         <setHeader name="CamelHttpMethod">
             <constant>POST</constant>
         </setHeader>
