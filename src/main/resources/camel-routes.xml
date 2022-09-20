@@ -61,7 +61,10 @@
     </route>
     <route id="log">
         <from uri="direct:log"/>
-        <removeHeaders pattern="CamelHttp*"/>
+        <setBody>
+            <simple>{"_id":"${id}-${messageTimestamp}", "type": "${headers.x-redhat-type}", "uid": "${headers.x-redhat-uid}", "content": ${body}}</simple>
+        </setBody>
+        <removeHeaders pattern="*"/>
         <choice> 
         	 <when>
             	<simple>${properties:app.log.http.auth.basic} =~ 'true'</simple>
@@ -76,16 +79,14 @@
         <setHeader name="Content-Type">
             <constant>application/json</constant>
         </setHeader>
-        <setBody>
-            <simple>{"type": "${headers.x-redhat-type}", "uid": "${headers.x-redhat-uid}", "content": ${body}}</simple>
-        </setBody>
         <log loggingLevel="INFO" message="\n--- Logger request ---\nRequest body:\n${body}\nRequest headers:\n${headers}\n---"/>
-        <to uri="{{logger.url}}?bridgeEndpoint=false&amp;x509HostnameVerifier=#noop"/>
+        <!--to uri="{{logger.url}}?bridgeEndpoint=false&amp;x509HostnameVerifier=#noop"/-->
+        <to uri="netty-http:{{logger.url}}?bridgeEndpoint=false&amp;hostnameVerification=false"/>
         <log loggingLevel="INFO" message="\n--- Logger response ---\nResponse body:\n${body}\nResponse headers:\n${headers}\n---"/>
     </route>
     <route id="Log error">
         <from uri="direct:logError"/>
-        <log logName="net.gmsworld.server.camel" loggingLevel="ERROR" message="Operation failed with exception: ${exception.stacktrace}"/>
+        <log loggingLevel="ERROR" message="Operation failed with exception: ${exception.stacktrace}"/>
         <setBody>
             <constant>{"error" : "Operation failed"}</constant>
         </setBody>
