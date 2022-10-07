@@ -7,7 +7,7 @@
 	        <!-- enrich with x-redhat-uid header and type -->
         	<choice>
     	        <when>
-        	        <simple>${headers.x-redhat-uid} == null</simple>
+        	        <simple>${headers.x-redhat-uid} == null || ${headers.x-redhat-uid.length} == 0</simple>
             	    <setHeader name="x-redhat-uid">
                 	    <simple>${properties:app.default.user}</simple>
                 	</setHeader>
@@ -54,8 +54,8 @@
         		</when>
 		    </choice>
         	<doCatch>
-                        <exception>java.lang.Exception</exception>
-                        <to uri="direct:logError"/>
+                 <exception>java.lang.Exception</exception>
+                 <to uri="direct:logError"/>
              </doCatch>
          </doTry>
     </route>
