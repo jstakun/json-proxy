@@ -97,6 +97,7 @@
     </route>
     <route id="status">
         <from uri="direct:status"/>
+        <log loggingLevel="INFO" message="Status: {{app.status.value}}"/>
         <setBody>
         	<simple>{"status" : "{{app.status.value}}"}</simple>
         </setBody>
