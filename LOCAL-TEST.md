@@ -6,3 +6,9 @@ curl -v -H "Content-Type: application/json" -H "X-RedHat-UID: admin" -d '{"hello
 
 podman stop --all
 podman rm --all
+
+-- truststore - import certs chain
+
+keytool -importcert -keystore truststore.jks -storepass password -file elab-local.pem 
+keytool -importcert -keystore truststore.jks -storepass password -file elab-local-ca.pem --alias ca
+keytool -importcert -keystore truststore.jks -storepass password -file elab-local-in-ca.pem --alias in-ca

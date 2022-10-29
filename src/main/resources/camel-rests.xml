@@ -2,11 +2,14 @@
 <rests xmlns="http://camel.apache.org/schema/spring"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://camel.apache.org/schema/spring https://camel.apache.org/schema/spring/camel-spring-3.18.0.xsd">
     <rest id="json-proxy-rests" path="/">
-        <post consumes="application/json" id="predictions-post" path="/predictions">
+        <post id="predictions-post" consumes="application/json" path="/predictions">
             <to uri="direct:predictions"/>
         </post>
         <get id="predictions-get" produces="application/json" path="/predictions">
              <to uri="direct:predictions"/>
+        </get>
+        <get id="status-get" produces="application/json" path="/status">
+             <to uri="direct:status"/>
         </get>
      </rest>
 </rests>

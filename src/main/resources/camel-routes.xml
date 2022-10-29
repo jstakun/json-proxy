@@ -80,8 +80,8 @@
             <constant>application/json</constant>
         </setHeader>
         <log loggingLevel="INFO" message="\n--- Logger request ---\nRequest body:\n${body}\nRequest headers:\n${headers}\n---"/>
-        <!--to uri="{{logger.url}}?bridgeEndpoint=false&amp;x509HostnameVerifier=#noop"/-->
-        <to uri="netty-http:{{logger.url}}?bridgeEndpoint=false&amp;hostnameVerification=false"/>
+        <to uri="{{logger.url}}?bridgeEndpoint=false&amp;x509HostnameVerifier=#noop"/>
+        <!--to uri="netty-http:{{logger.url}}?bridgeEndpoint=false&amp;hostnameVerification=false"/-->
         <log loggingLevel="INFO" message="\n--- Logger response ---\nResponse body:\n${body}\nResponse headers:\n${headers}\n---"/>
     </route>
     <route id="Log error">
@@ -95,18 +95,10 @@
             <constant>500</constant>
         </setHeader>
     </route>
-    <!--route id="proxy">
-        <from uri="direct:proxy"/> 
-    	<log loggingLevel="INFO" message="Proxy\nRequest body:\n${body}"/>
-    	<setBody>
-            <simple>{"status": "ok"}</simple>
+    <route id="status">
+        <from uri="direct:status"/>
+        <setBody>
+        	<simple>{"status" : "{{app.status.value}}"}</simple>
         </setBody>
-    </route-->
-    <!--route id="Process output">
-        <from uri="direct:processOutput"/>
-        <marshal>
-            <json id="json" library="Jackson"/>
-        </marshal>
-        <removeHeaders pattern="*"/>
-    </route-->
+	</route>
 </routes>
