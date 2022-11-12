@@ -13,6 +13,12 @@
                 	</setHeader>
             	</when>
         	</choice>
+        	<throttle timePeriodMillis="60000" rejectExecution="true">
+    			<simple>${properties:app.rate.limit.count}</simple>
+    			<correlationExpression>
+      				<header>x-redhat-uid</header>
+    			</correlationExpression>
+  			</throttle>
         	<removeHeaders pattern="CamelHttp*"/>
         	<choice>
         		<when>
@@ -53,6 +59,17 @@
         			</setHeader>
         		</when>
 		    </choice>
+		    <doCatch>
+		    	<exception>org.apache.camel.processor.ThrottlerRejectedExecutionException</exception>
+		    	<log loggingLevel="ERROR" message="Too many requests for user ${headers.x-redhat-uid} "/>
+		    	<removeHeaders pattern="*"/>
+		    	<setHeader name="CamelHttpResponseCode">
+            	   <constant>429</constant>
+        		</setHeader>
+        		<setBody>
+        		    <constant>{"error" : "Too many requests"}</constant>
+        		</setBody>
+ 		    </doCatch>
         	<doCatch>
                  <exception>java.lang.Exception</exception>
                  <to uri="direct:logError"/>
@@ -91,8 +108,8 @@
             <constant>{"error" : "Operation failed"}</constant>
         </setBody>
         <removeHeaders pattern="*"/>
-        <setHeader name="CamelHttpResponseCode">
-            <constant>500</constant>
+		<setHeader name="CamelHttpResponseCode">
+           	<constant>500</constant>
         </setHeader>
     </route>
     <route id="status">

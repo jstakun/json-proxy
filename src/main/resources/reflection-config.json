@@ -9,6 +9,15 @@
     "allPublicFields" : true
   },
   {
+    "name" : "org.apache.camel.processor.ThrottlerRejectedExecutionException",
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true,
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true,
+    "allDeclaredFields" : true,
+    "allPublicFields" : true
+  },  
+  {
     "name" : "org.apache.commons.pool2.impl.DefaultEvictionPolicy",
     "allDeclaredConstructors" : true,
     "allPublicConstructors" : true,
